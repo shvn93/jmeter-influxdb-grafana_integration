@@ -19,8 +19,10 @@
    ```powershell
    .\reset-environment.ps1 -Confirm
 3. Run setup (recommended):
+   ```powershell
    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
    .\setup-influx-grafana-autotoken.ps1 --force
-   Or double-click run-setup.bat.
+Or double-click run-setup.bat
 4. Open Grafana at http://localhost:3000 (login admin / Grafana@123).
    The datasource InfluxDB (jmeter) and the JMeter dashboard are auto-provisioned.
+
