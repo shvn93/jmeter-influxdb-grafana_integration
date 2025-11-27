@@ -1,0 +1,12 @@
+# Don't commit local DB data or secrets
+/jmeter_monitoring/influxdb_data/
+ /jmeter_monitoring/secrets.json
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Editor files
+.vscode/
+.idea/
+*.suo
