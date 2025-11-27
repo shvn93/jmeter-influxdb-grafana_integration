@@ -1,0 +1,118 @@
+{
+  "annotations": { "list": [] },
+  "description": "Custom JMeter dashboard (fields adjusted to your InfluxDB schema).",
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": "InfluxDB (jmeter)",
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "id": 1,
+      "options": {},
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"jmeter_bucket\")\\n  |> range(start: -1h)\\n  |> filter(fn: (r) => r._measurement == \"jmeter\")\\n  |> filter(fn: (r) => r._field == \"count\")\\n  |> aggregateWindow(every: 10s, fn: sum, createEmpty: false)\\n  |> yield(name: \"requests\")"
+        }
+      ],
+      "title": "Requests / sec (approx via count)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "InfluxDB (jmeter)",
+      "fieldConfig": { "defaults": { "unit": "ms" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "id": 2,
+      "options": {},
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"jmeter_bucket\")\\n  |> range(start: -1h)\\n  |> filter(fn: (r) => r._measurement == \"jmeter\")\\n  |> filter(fn: (r) => r._field == \"avg\")\\n  |> aggregateWindow(every: 10s, fn: mean, createEmpty: false)\\n  |> yield(name: \"avg_response_time\")"
+        }
+      ],
+      "title": "Average Response Time (avg, ms)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "InfluxDB (jmeter)",
+      "fieldConfig": { "defaults": { "unit": "ms" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "id": 3,
+      "options": {},
+      "targets": [
+        {
+          "refId": "p90",
+          "query": "from(bucket: \"jmeter_bucket\")\\n  |> range(start: -1h)\\n  |> filter(fn: (r) => r._measurement == \"jmeter\" and r._field == \"pct90.0\")\\n  |> aggregateWindow(every: 30s, fn: mean, createEmpty: false)\\n  |> yield(name: \"p90\")"
+        },
+        {
+          "refId": "p95",
+          "query": "from(bucket: \"jmeter_bucket\")\\n  |> range(start: -1h)\\n  |> filter(fn: (r) => r._measurement == \"jmeter\" and r._field == \"pct95.0\")\\n  |> aggregateWindow(every: 30s, fn: mean, createEmpty: false)\\n  |> yield(name: \"p95\")"
+        },
+        {
+          "refId": "p99",
+          "query": "from(bucket: \"jmeter_bucket\")\\n  |> range(start: -1h)\\n  |> filter(fn: (r) => r._measurement == \"jmeter\" and r._field == \"pct99.0\")\\n  |> aggregateWindow(every: 30s, fn: mean, createEmpty: false)\\n  |> yield(name: \"p99\")"
+        }
+      ],
+      "title": "Percentiles (p90/p95/p99)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "InfluxDB (jmeter)",
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 8 },
+      "id": 4,
+      "options": {},
+      "targets": [
+        {
+          "refId": "err",
+          "query": "from(bucket: \"jmeter_bucket\")\\n  |> range(start: -1h)\\n  |> filter(fn: (r) => r._measurement == \"jmeter\" and (r._field == \"hit\"))\\n  |> aggregateWindow(every: 10s, fn: sum, createEmpty: false)\\n  |> yield(name: \"hits\")"
+        }
+      ],
+      "title": "Hits (use this to derive success ratio - 'hit' field)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "InfluxDB (jmeter)",
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 16 },
+      "id": 5,
+      "options": {},
+      "targets": [
+        {
+          "refId": "threads",
+          "query": "from(bucket: \"jmeter_bucket\")\\n  |> range(start: -1h)\\n  |> filter(fn: (r) => r._measurement == \"jmeter\" and (r._field == \"meanAT\" or r._field == \"maxAT\" or r._field == \"minAT\"))\\n  |> aggregateWindow(every: 10s, fn: mean, createEmpty: false)\\n  |> yield(name: \"threads_stats\")"
+        }
+      ],
+      "title": "Auxiliary timings (meanAT/maxAT/minAT)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "InfluxDB (jmeter)",
+      "fieldConfig": { "defaults": { "unit": "ms" }, "overrides": [] },
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 22 },
+      "id": 6,
+      "options": {},
+      "targets": [
+        {
+          "refId": "top",
+          "query": "from(bucket: \"jmeter_bucket\")\\n  |> range(start: -1h)\\n  |> filter(fn: (r) => r._measurement == \"jmeter\")\\n  |> filter(fn: (r) => r._field == \"avg\" or r._field == \"max\")\\n  |> keep(columns:[\"_time\",\"sampler\",\"_value\",\"_field\"]) \\n  |> group(columns:[\"sampler\"]) \\n  |> aggregateWindow(every: 1m, fn: mean)\\n  |> sort(columns:[\"_value\"], desc:true)\\n  |> limit(n:10)\\n  |> yield(name: \"top_slowest\")"
+        }
+      ],
+      "title": "Top 10 Slowest Samplers (avg/max)",
+      "type": "table"
+    }
+  ],
+  "schemaVersion": 36,
+  "style": "dark",
+  "tags": [ "jmeter", "influxdb", "flux" ],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": { "refresh_intervals": ["5s","10s","30s","1m","5m","15m","1h"], "time_options": ["5m","15m","1h","6h","12h","24h","2d","7d","30d"] },
+  "title": "Custom JMeter - InfluxDB (Flux) - Adjusted Fields",
+  "uid": null,
+  "version": 1
+}
